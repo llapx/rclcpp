@@ -249,6 +249,19 @@ NodeOptions::start_parameter_services(bool start_parameter_services)
 }
 
 bool
+NodeOptions::start_logger_services() const
+{
+  return this->start_logger_services_;
+}
+
+NodeOptions &
+NodeOptions::start_logger_services(bool start_logger_services)
+{
+  this->start_logger_services_ = start_logger_services;
+  return *this;
+}
+
+bool
 NodeOptions::start_parameter_event_publisher() const
 {
   return this->start_parameter_event_publisher_;

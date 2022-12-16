@@ -21,7 +21,9 @@
 #include "rclcpp/macros.hpp"
 #include "rclcpp/node_interfaces/node_base_interface.hpp"
 #include "rclcpp/node_interfaces/node_logging_interface.hpp"
+#include "rclcpp/node_interfaces/node_services_interface.hpp"
 #include "rclcpp/visibility_control.hpp"
+#include "rclcpp/logger_service.hpp"
 
 namespace rclcpp
 {
@@ -35,7 +37,10 @@ public:
   RCLCPP_SMART_PTR_ALIASES_ONLY(NodeLoggingInterface)
 
   RCLCPP_PUBLIC
-  explicit NodeLogging(rclcpp::node_interfaces::NodeBaseInterface * node_base);
+  explicit NodeLogging(
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+    const node_interfaces::NodeServicesInterface::SharedPtr node_services,
+    bool start_logger_services);
 
   RCLCPP_PUBLIC
   virtual
@@ -53,9 +58,11 @@ private:
   RCLCPP_DISABLE_COPY(NodeLogging)
 
   /// Handle to the NodeBaseInterface given in the constructor.
-  rclcpp::node_interfaces::NodeBaseInterface * node_base_;
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_;
 
   rclcpp::Logger logger_;
+
+  std::shared_ptr<LoggerService> logger_service_;
 };
 
 }  // namespace node_interfaces
