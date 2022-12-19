@@ -34,10 +34,13 @@ LoggerService::LoggerService(
     node_base, node_services,
     node_name + "/get_logger_level",
     [](
-      const std::shared_ptr<rmw_request_id_t>,
-      const std::shared_ptr<rcl_interfaces::srv::GetLoggerLevels::Request> request,
-      std::shared_ptr<rcl_interfaces::srv::GetLoggerLevels::Response> response)
+        const std::shared_ptr<rmw_request_id_t>,
+        const std::shared_ptr<rcl_interfaces::srv::GetLoggerLevels::Request> request,
+        std::shared_ptr<rcl_interfaces::srv::GetLoggerLevels::Response> response)
     {
+      for (auto &n : request->names) {
+        std::cout << "Name: " << n << std::endl;
+      }
     },
     qos_profile, nullptr);
 
