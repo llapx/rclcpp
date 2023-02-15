@@ -40,6 +40,12 @@ public:
   virtual
   void
   add_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) = 0;
+
+  /// Remove a callback group to the node.
+  RCLCPP_PUBLIC
+  virtual
+  void
+  remove_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) = 0;
 };
 
 }  // namespace node_interfaces

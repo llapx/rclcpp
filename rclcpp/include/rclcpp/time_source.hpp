@@ -97,6 +97,7 @@ public:
    * otherwise the source time is defined by the system.
    *
    * \param node_base_interface Node base interface.
+   * \param node_executor_interface Node executor interface.
    * \param node_topics_interface Node topic base interface.
    * \param node_graph_interface Node graph interface.
    * \param node_services_interface Node service interface.
@@ -107,6 +108,7 @@ public:
   RCLCPP_PUBLIC
   void attachNode(
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_interface,
+    rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor_interface,
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics_interface,
     rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph_interface,
     rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services_interface,

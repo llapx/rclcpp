@@ -21,6 +21,7 @@ using rclcpp::node_interfaces::NodeTimeSource;
 
 NodeTimeSource::NodeTimeSource(
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+  rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor,
   rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics,
   rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph,
   rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services,
@@ -30,6 +31,7 @@ NodeTimeSource::NodeTimeSource(
   const rclcpp::QoS & qos,
   bool use_clock_thread)
 : node_base_(node_base),
+  node_executor_(node_executor),
   node_topics_(node_topics),
   node_graph_(node_graph),
   node_services_(node_services),
@@ -40,6 +42,7 @@ NodeTimeSource::NodeTimeSource(
 {
   time_source_.attachNode(
     node_base_,
+    node_executor_,
     node_topics_,
     node_graph_,
     node_services_,

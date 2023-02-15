@@ -45,6 +45,11 @@ public:
   void
   add_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) override;
 
+  /// Remove a callback group to the node.
+  RCLCPP_PUBLIC
+  void
+  remove_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) override;
+
 private:
   RCLCPP_DISABLE_COPY(NodeExecutor)
 

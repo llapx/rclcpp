@@ -36,6 +36,7 @@
 #include "rclcpp/node.hpp"
 #include "rclcpp/node_interfaces/node_base.hpp"
 #include "rclcpp/node_interfaces/node_clock.hpp"
+#include "rclcpp/node_interfaces/node_executor.hpp"
 #include "rclcpp/node_interfaces/node_graph.hpp"
 #include "rclcpp/node_interfaces/node_logging.hpp"
 #include "rclcpp/node_interfaces/node_parameters.hpp"
@@ -75,6 +76,7 @@ LifecycleNode::LifecycleNode(
       *(options.get_rcl_node_options()),
       options.use_intra_process_comms(),
       options.enable_topic_statistics())),
+  node_executor_(new rclcpp::node_interfaces::NodeExecutor(node_base_)),
   node_graph_(new rclcpp::node_interfaces::NodeGraph(node_base_.get())),
   node_timers_(new rclcpp::node_interfaces::NodeTimers(node_base_.get())),
   node_topics_(new rclcpp::node_interfaces::NodeTopics(node_base_.get(), node_timers_.get())),
@@ -108,6 +110,7 @@ LifecycleNode::LifecycleNode(
     )),
   node_time_source_(new rclcpp::node_interfaces::NodeTimeSource(
       node_base_,
+      node_executor_,
       node_topics_,
       node_graph_,
       node_services_,

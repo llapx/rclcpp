@@ -235,6 +235,7 @@ public:
   // Attach a node to this time source
   void attachNode(
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_interface,
+    rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor_interface,
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics_interface,
     rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph_interface,
     rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services_interface,
@@ -243,6 +244,7 @@ public:
     rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_parameters_interface)
   {
     node_base_ = node_base_interface;
+    node_executor_ = node_executor_interface;
     node_topics_ = node_topics_interface;
     node_graph_ = node_graph_interface;
     node_services_ = node_services_interface;
@@ -307,6 +309,7 @@ public:
     on_set_parameters_callback_.reset();
     parameter_subscription_.reset();
     node_base_.reset();
+    node_executor_.reset();
     node_topics_.reset();
     node_graph_.reset();
     node_services_.reset();
@@ -334,6 +337,7 @@ private:
 
   // Preserve the node reference
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_{nullptr};
+  rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor_{nullptr};
   rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics_{nullptr};
   rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph_{nullptr};
   rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services_{nullptr};
@@ -351,9 +355,7 @@ private:
   using SubscriptionT = rclcpp::Subscription<rosgraph_msgs::msg::Clock>;
   std::shared_ptr<SubscriptionT> clock_subscription_{nullptr};
   std::mutex clock_sub_lock_;
-  rclcpp::CallbackGroup::SharedPtr clock_callback_group_;
-  rclcpp::executors::SingleThreadedExecutor::SharedPtr clock_executor_;
-  std::promise<void> cancel_clock_executor_promise_;
+  rclcpp::CallbackGroup::SharedPtr clock_callback_group_{nullptr};
 
   // The clock callback itself
   void clock_cb(std::shared_ptr<const rosgraph_msgs::msg::Clock> msg)
@@ -396,18 +398,7 @@ private:
       options.callback_group = clock_callback_group_;
       rclcpp::ExecutorOptions exec_options;
       exec_options.context = node_base_->get_context();
-      clock_executor_ =
-        std::make_shared<rclcpp::executors::SingleThreadedExecutor>(exec_options);
-      if (!clock_executor_thread_.joinable()) {
-        cancel_clock_executor_promise_ = std::promise<void>{};
-        clock_executor_thread_ = std::thread(
-          [this]() {
-            auto future = cancel_clock_executor_promise_.get_future();
-            clock_executor_->add_callback_group(clock_callback_group_, node_base_);
-            clock_executor_->spin_until_future_complete(future);
-          }
-        );
-      }
+      node_executor_->add_callback_group(clock_callback_group_);
     }
 
     clock_subscription_ = rclcpp::create_subscription<rosgraph_msgs::msg::Clock>(
@@ -430,11 +421,9 @@ private:
   void destroy_clock_sub()
   {
     std::lock_guard<std::mutex> guard(clock_sub_lock_);
-    if (clock_executor_thread_.joinable()) {
-      cancel_clock_executor_promise_.set_value();
-      clock_executor_->cancel();
-      clock_executor_thread_.join();
-      clock_executor_->remove_callback_group(clock_callback_group_);
+    if (clock_callback_group_) {
+      node_executor_->remove_callback_group(clock_callback_group_);
+      clock_callback_group_ = nullptr;
     }
     clock_subscription_.reset();
   }
@@ -531,6 +520,7 @@ void TimeSource::attachNode(rclcpp::Node::SharedPtr node)
   node_state_->set_use_clock_thread(node->get_node_options().use_clock_thread());
   attachNode(
     node->get_node_base_interface(),
+    node->get_node_executor_interface(),
     node->get_node_topics_interface(),
     node->get_node_graph_interface(),
     node->get_node_services_interface(),
@@ -541,6 +531,7 @@ void TimeSource::attachNode(rclcpp::Node::SharedPtr node)
 
 void TimeSource::attachNode(
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_interface,
+  rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor_interface,
   rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics_interface,
   rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph_interface,
   rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services_interface,
@@ -550,6 +541,7 @@ void TimeSource::attachNode(
 {
   node_state_->attachNode(
     std::move(node_base_interface),
+    std::move(node_executor_interface),
     std::move(node_topics_interface),
     std::move(node_graph_interface),
     std::move(node_services_interface),

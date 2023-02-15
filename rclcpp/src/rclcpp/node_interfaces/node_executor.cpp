@@ -41,10 +41,10 @@ NodeExecutor::NodeExecutor(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr
 NodeExecutor::~NodeExecutor()
 {
   if (thread_.joinable()) {
+    std::cerr << "stop thread...." << std::endl;
     cancel_executor_promise_.set_value();
     executor_->cancel();
     thread_.join();
-    std::cerr << "stop thread...." << std::endl;
   }
 }
 
@@ -52,4 +52,10 @@ void
 NodeExecutor::add_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr)
 {
   executor_->add_callback_group(group_ptr, node_base_);
+}
+
+void
+NodeExecutor::remove_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr)
+{
+  executor_->remove_callback_group(group_ptr);
 }
