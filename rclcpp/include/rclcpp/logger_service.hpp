@@ -39,10 +39,12 @@ public:
   RCLCPP_PUBLIC
   LoggerService(
     const std::shared_ptr<node_interfaces::NodeBaseInterface> node_base,
+    const std::shared_ptr<node_interfaces::NodeExecutorInterface> node_executor,
     const std::shared_ptr<node_interfaces::NodeServicesInterface> node_services,
     const rmw_qos_profile_t & qos_profile)
   : LoggerService(
       node_base,
+      node_executor,
       node_services,
       rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(qos_profile)))
   {}
@@ -50,12 +52,14 @@ public:
   RCLCPP_PUBLIC
   LoggerService(
     const std::shared_ptr<node_interfaces::NodeBaseInterface> node_base,
+    const std::shared_ptr<node_interfaces::NodeExecutorInterface> node_executor,
     const std::shared_ptr<node_interfaces::NodeServicesInterface> node_services,
     const rclcpp::QoS & qos_profile = rclcpp::ServicesQoS());
 
 private:
   rclcpp::Service<rcl_interfaces::srv::GetLoggerLevels>::SharedPtr get_loggers_service_;
   rclcpp::Service<rcl_interfaces::srv::SetLoggerLevels>::SharedPtr set_loggers_service_;
+  rclcpp::CallbackGroup::SharedPtr callback_group_{nullptr};
 };
 
 }  // namespace rclcpp

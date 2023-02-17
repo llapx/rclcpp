@@ -249,15 +249,15 @@ NodeOptions::start_parameter_services(bool start_parameter_services)
 }
 
 bool
-NodeOptions::start_logger_services() const
+NodeOptions::enable_log_service() const
 {
-  return this->start_logger_services_;
+  return this->enable_log_service_;
 }
 
 NodeOptions &
-NodeOptions::start_logger_services(bool start_logger_services)
+NodeOptions::enable_log_service(bool enable_log_service)
 {
-  this->start_logger_services_ = start_logger_services;
+  this->enable_log_service_ = enable_log_service;
   return *this;
 }
 

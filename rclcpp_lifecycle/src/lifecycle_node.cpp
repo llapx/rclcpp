@@ -83,8 +83,9 @@ LifecycleNode::LifecycleNode(
   node_services_(new rclcpp::node_interfaces::NodeServices(node_base_.get())),
   node_logging_(new rclcpp::node_interfaces::NodeLogging(
       node_base_,
+      node_executor_,
       node_services_,
-      options.start_logger_services()
+      options.enable_log_service()
     )),
   node_clock_(new rclcpp::node_interfaces::NodeClock(
       node_base_,

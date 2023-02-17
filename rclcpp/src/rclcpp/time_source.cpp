@@ -396,8 +396,6 @@ private:
         false
       );
       options.callback_group = clock_callback_group_;
-      rclcpp::ExecutorOptions exec_options;
-      exec_options.context = node_base_->get_context();
       node_executor_->add_callback_group(clock_callback_group_);
     }
 

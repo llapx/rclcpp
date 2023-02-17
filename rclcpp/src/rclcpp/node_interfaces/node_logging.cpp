@@ -18,14 +18,15 @@ using rclcpp::node_interfaces::NodeLogging;
 
 NodeLogging::NodeLogging(
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+  rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor,
   const node_interfaces::NodeServicesInterface::SharedPtr node_services,
-  bool start_logger_services)
+  bool enable_log_service)
 : node_base_(node_base)
 {
   logger_ = rclcpp::get_logger(NodeLogging::get_logger_name());
 
-  if (start_logger_services) {
-    logger_service_ = std::make_shared<LoggerService>(node_base, node_services);
+  if (enable_log_service) {
+    logger_service_ = std::make_shared<LoggerService>(node_base, node_executor, node_services);
   }
 }
 

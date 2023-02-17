@@ -20,6 +20,7 @@
 #include "rclcpp/logger.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/node_interfaces/node_base_interface.hpp"
+#include "rclcpp/node_interfaces/node_executor_interface.hpp"
 #include "rclcpp/node_interfaces/node_logging_interface.hpp"
 #include "rclcpp/node_interfaces/node_services_interface.hpp"
 #include "rclcpp/visibility_control.hpp"
@@ -39,8 +40,9 @@ public:
   RCLCPP_PUBLIC
   explicit NodeLogging(
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+    rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor,
     const node_interfaces::NodeServicesInterface::SharedPtr node_services,
-    bool start_logger_services);
+    bool enable_log_service);
 
   RCLCPP_PUBLIC
   virtual

@@ -31,7 +31,6 @@ NodeExecutor::NodeExecutor(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr
     thread_ = std::thread(
       [this]() {
         auto future = cancel_executor_promise_.get_future();
-        std::cerr << "start thread...." << std::endl;
         executor_->spin_until_future_complete(future);
       }
     );
@@ -41,7 +40,6 @@ NodeExecutor::NodeExecutor(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr
 NodeExecutor::~NodeExecutor()
 {
   if (thread_.joinable()) {
-    std::cerr << "stop thread...." << std::endl;
     cancel_executor_promise_.set_value();
     executor_->cancel();
     thread_.join();
