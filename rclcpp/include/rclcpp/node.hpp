@@ -49,7 +49,6 @@
 #include "rclcpp/message_memory_strategy.hpp"
 #include "rclcpp/node_interfaces/node_base_interface.hpp"
 #include "rclcpp/node_interfaces/node_clock_interface.hpp"
-#include "rclcpp/node_interfaces/node_executor_interface.hpp"
 #include "rclcpp/node_interfaces/node_graph_interface.hpp"
 #include "rclcpp/node_interfaces/node_logging_interface.hpp"
 #include "rclcpp/node_interfaces/node_parameters_interface.hpp"
@@ -1410,11 +1409,6 @@ public:
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr
   get_node_base_interface();
 
-  /// Return the Node's internal NodeExecutorInterface implementation.
-  RCLCPP_PUBLIC
-  rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr
-  get_node_executor_interface();
-
   /// Return the Node's internal NodeClockInterface implementation.
   RCLCPP_PUBLIC
   rclcpp::node_interfaces::NodeClockInterface::SharedPtr
@@ -1584,7 +1578,6 @@ private:
   RCLCPP_DISABLE_COPY(Node)
 
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_;
-  rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor_;
   rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph_;
   rclcpp::node_interfaces::NodeTimersInterface::SharedPtr node_timers_;
   rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics_;

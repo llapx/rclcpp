@@ -24,6 +24,7 @@
 #include "rcl/node.h"
 #include "rclcpp/callback_group.hpp"
 #include "rclcpp/context.hpp"
+#include "rclcpp/executors.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/node_interfaces/node_base_interface.hpp"
 #include "rclcpp/visibility_control.hpp"
@@ -98,6 +99,16 @@ public:
     rclcpp::CallbackGroupType group_type,
     bool automatically_add_to_executor_with_node = true) override;
 
+  /// Add a callback group to the node.
+  RCLCPP_PUBLIC
+  void
+  add_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) override;
+
+  /// Remove a callback group to the node.
+  RCLCPP_PUBLIC
+  void
+  remove_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) override;
+
   RCLCPP_PUBLIC
   rclcpp::CallbackGroup::SharedPtr
   get_default_callback_group() override;
@@ -155,6 +166,9 @@ private:
   mutable std::recursive_mutex notify_guard_condition_mutex_;
   rclcpp::GuardCondition notify_guard_condition_;
   bool notify_guard_condition_is_valid_;
+  rclcpp::executors::SingleThreadedExecutor::SharedPtr executor_;
+  std::promise<void> executor_promise_;
+  std::thread thread_;
 };
 
 }  // namespace node_interfaces

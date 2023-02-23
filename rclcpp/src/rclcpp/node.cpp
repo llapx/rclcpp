@@ -29,7 +29,6 @@
 #include "rclcpp/node.hpp"
 #include "rclcpp/node_interfaces/node_base.hpp"
 #include "rclcpp/node_interfaces/node_clock.hpp"
-#include "rclcpp/node_interfaces/node_executor.hpp"
 #include "rclcpp/node_interfaces/node_graph.hpp"
 #include "rclcpp/node_interfaces/node_logging.hpp"
 #include "rclcpp/node_interfaces/node_parameters.hpp"
@@ -167,16 +166,14 @@ Node::Node(
       *(options.get_rcl_node_options()),
       options.use_intra_process_comms(),
       options.enable_topic_statistics())),
-  node_executor_(new rclcpp::node_interfaces::NodeExecutor(node_base_)),
   node_graph_(new rclcpp::node_interfaces::NodeGraph(node_base_.get())),
   node_timers_(new rclcpp::node_interfaces::NodeTimers(node_base_.get())),
   node_topics_(new rclcpp::node_interfaces::NodeTopics(node_base_.get(), node_timers_.get())),
-  node_services_(new rclcpp::node_interfaces::NodeServices(node_base_.get())),
+  node_services_(new rclcpp::node_interfaces::NodeServices(node_base_)),
   node_logging_(new rclcpp::node_interfaces::NodeLogging(
-      node_base_,
-      node_executor_,
-      node_services_,
-      options.enable_log_service()
+    node_base_,
+    node_services_,
+    options.enable_log_service()
     )),
   node_clock_(new rclcpp::node_interfaces::NodeClock(
       node_base_,
@@ -204,7 +201,6 @@ Node::Node(
     )),
   node_time_source_(new rclcpp::node_interfaces::NodeTimeSource(
       node_base_,
-      node_executor_,
       node_topics_,
       node_graph_,
       node_services_,
@@ -239,7 +235,6 @@ Node::Node(
   const Node & other,
   const std::string & sub_namespace)
 : node_base_(other.node_base_),
-  node_executor_(other.node_executor_),
   node_graph_(other.node_graph_),
   node_timers_(other.node_timers_),
   node_topics_(other.node_topics_),
@@ -558,12 +553,6 @@ rclcpp::node_interfaces::NodeBaseInterface::SharedPtr
 Node::get_node_base_interface()
 {
   return node_base_;
-}
-
-rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr
-Node::get_node_executor_interface()
-{
-  return node_executor_;
 }
 
 rclcpp::node_interfaces::NodeClockInterface::SharedPtr

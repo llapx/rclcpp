@@ -207,8 +207,8 @@ public:
   ~NodeState()
   {
     if (
-      node_base_ || node_topics_ || node_graph_ || node_services_ ||
-      node_logging_ || node_clock_ || node_parameters_)
+      node_base_ || node_topics_ || node_graph_ || node_services_
+      || node_logging_ || node_clock_ || node_parameters_)
     {
       detachNode();
     }
@@ -235,7 +235,6 @@ public:
   // Attach a node to this time source
   void attachNode(
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_interface,
-    rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor_interface,
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics_interface,
     rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph_interface,
     rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services_interface,
@@ -244,7 +243,6 @@ public:
     rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_parameters_interface)
   {
     node_base_ = node_base_interface;
-    node_executor_ = node_executor_interface;
     node_topics_ = node_topics_interface;
     node_graph_ = node_graph_interface;
     node_services_ = node_services_interface;
@@ -299,6 +297,7 @@ public:
   // Detach the attached node
   void detachNode()
   {
+    std::cerr << "detachNode..." << std::endl;
     // destroy_clock_sub() *must* be first here, to ensure that the executor
     // can't possibly call any of the callbacks as we are cleaning up.
     destroy_clock_sub();
@@ -309,7 +308,6 @@ public:
     on_set_parameters_callback_.reset();
     parameter_subscription_.reset();
     node_base_.reset();
-    node_executor_.reset();
     node_topics_.reset();
     node_graph_.reset();
     node_services_.reset();
@@ -337,7 +335,6 @@ private:
 
   // Preserve the node reference
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_{nullptr};
-  rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor_{nullptr};
   rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics_{nullptr};
   rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph_{nullptr};
   rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services_{nullptr};
@@ -396,7 +393,7 @@ private:
         false
       );
       options.callback_group = clock_callback_group_;
-      node_executor_->add_callback_group(clock_callback_group_);
+      node_base_->add_callback_group(clock_callback_group_);
     }
 
     clock_subscription_ = rclcpp::create_subscription<rosgraph_msgs::msg::Clock>(
@@ -419,11 +416,15 @@ private:
   void destroy_clock_sub()
   {
     std::lock_guard<std::mutex> guard(clock_sub_lock_);
+    if (!clock_subscription_) {
+      return;
+    }
+
     if (clock_callback_group_) {
-      node_executor_->remove_callback_group(clock_callback_group_);
-      clock_callback_group_ = nullptr;
+      node_base_->remove_callback_group(clock_callback_group_);
     }
     clock_subscription_.reset();
+    clock_subscription_ = nullptr;
   }
 
   // On set Parameters callback handle
@@ -518,7 +519,6 @@ void TimeSource::attachNode(rclcpp::Node::SharedPtr node)
   node_state_->set_use_clock_thread(node->get_node_options().use_clock_thread());
   attachNode(
     node->get_node_base_interface(),
-    node->get_node_executor_interface(),
     node->get_node_topics_interface(),
     node->get_node_graph_interface(),
     node->get_node_services_interface(),
@@ -529,7 +529,6 @@ void TimeSource::attachNode(rclcpp::Node::SharedPtr node)
 
 void TimeSource::attachNode(
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_interface,
-  rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor_interface,
   rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics_interface,
   rclcpp::node_interfaces::NodeGraphInterface::SharedPtr node_graph_interface,
   rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services_interface,
@@ -539,7 +538,6 @@ void TimeSource::attachNode(
 {
   node_state_->attachNode(
     std::move(node_base_interface),
-    std::move(node_executor_interface),
     std::move(node_topics_interface),
     std::move(node_graph_interface),
     std::move(node_services_interface),

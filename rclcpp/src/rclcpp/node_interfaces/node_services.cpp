@@ -18,9 +18,10 @@
 
 using rclcpp::node_interfaces::NodeServices;
 
-NodeServices::NodeServices(rclcpp::node_interfaces::NodeBaseInterface * node_base)
+NodeServices::NodeServices(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base)
 : node_base_(node_base)
-{}
+{
+}
 
 NodeServices::~NodeServices()
 {}

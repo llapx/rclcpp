@@ -138,14 +138,26 @@ NodeBase::NodeBase(
 
   // Indicate the notify_guard_condition is now valid.
   notify_guard_condition_is_valid_ = true;
+
+  // Create internal executor thread
+  rclcpp::ExecutorOptions exec_options;
+  exec_options.context = context_;
+  executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>(exec_options);
 }
 
 NodeBase::~NodeBase()
 {
+  std::cerr << "~NodeBase..." << std::endl;
   // Finalize the interrupt guard condition after removing self from graph listener.
   {
     std::lock_guard<std::recursive_mutex> notify_condition_lock(notify_guard_condition_mutex_);
     notify_guard_condition_is_valid_ = false;
+  }
+
+  if (thread_.joinable()) {
+    executor_promise_.set_value();
+    executor_->cancel();
+    thread_.join();
   }
 }
 
@@ -208,6 +220,29 @@ NodeBase::create_callback_group(
   std::lock_guard<std::mutex> lock(callback_groups_mutex_);
   callback_groups_.push_back(group);
   return group;
+}
+
+void
+NodeBase::add_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr)
+{
+  if (!thread_.joinable()) {
+    executor_promise_ = std::promise<void>{};
+    thread_ = std::thread(
+      [this]() {
+        auto future = executor_promise_.get_future();
+        executor_->spin_until_future_complete(future);
+      }
+    );
+  }
+  executor_->add_callback_group(group_ptr, shared_from_this());
+}
+
+void
+NodeBase::remove_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr)
+{
+  if (thread_.joinable()) {
+    executor_->remove_callback_group(group_ptr);
+  }
 }
 
 rclcpp::CallbackGroup::SharedPtr

@@ -19,12 +19,13 @@
 
 #include "rclcpp/logger.hpp"
 #include "rclcpp/macros.hpp"
+#include "rclcpp/node.hpp"
 #include "rclcpp/node_interfaces/node_base_interface.hpp"
-#include "rclcpp/node_interfaces/node_executor_interface.hpp"
 #include "rclcpp/node_interfaces/node_logging_interface.hpp"
 #include "rclcpp/node_interfaces/node_services_interface.hpp"
 #include "rclcpp/visibility_control.hpp"
-#include "rclcpp/logger_service.hpp"
+#include "rcl_interfaces/srv/get_logger_levels.hpp"
+#include "rcl_interfaces/srv/set_logger_levels.hpp"
 
 namespace rclcpp
 {
@@ -40,8 +41,7 @@ public:
   RCLCPP_PUBLIC
   explicit NodeLogging(
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
-    rclcpp::node_interfaces::NodeExecutorInterface::SharedPtr node_executor,
-    const node_interfaces::NodeServicesInterface::SharedPtr node_services,
+    rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services,
     bool enable_log_service);
 
   RCLCPP_PUBLIC
@@ -59,12 +59,19 @@ public:
 private:
   RCLCPP_DISABLE_COPY(NodeLogging)
 
+  RCLCPP_PUBLIC
+  void
+  add_log_services();
+
   /// Handle to the NodeBaseInterface given in the constructor.
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_;
+  rclcpp::node_interfaces::NodeServicesInterface::SharedPtr node_services_;
 
   rclcpp::Logger logger_;
 
-  std::shared_ptr<LoggerService> logger_service_;
+  rclcpp::Service<rcl_interfaces::srv::GetLoggerLevels>::SharedPtr get_loggers_service_;
+  rclcpp::Service<rcl_interfaces::srv::SetLoggerLevels>::SharedPtr set_loggers_service_;
+  rclcpp::CallbackGroup::SharedPtr callback_group_{nullptr};
 };
 
 }  // namespace node_interfaces
