@@ -99,15 +99,17 @@ public:
     rclcpp::CallbackGroupType group_type,
     bool automatically_add_to_executor_with_node = true) override;
 
-  /// Add a callback group to the node.
   RCLCPP_PUBLIC
-  void
-  add_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) override;
+  rclcpp::CallbackGroup::SharedPtr
+  get_builtin_callback_group() override;
 
-  /// Remove a callback group to the node.
   RCLCPP_PUBLIC
   void
-  remove_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) override;
+  start_builtin_executor_thread() override;
+
+  RCLCPP_PUBLIC
+  void
+  stop_builtin_executor_thread() override;
 
   RCLCPP_PUBLIC
   rclcpp::CallbackGroup::SharedPtr
@@ -167,6 +169,7 @@ private:
   rclcpp::GuardCondition notify_guard_condition_;
   bool notify_guard_condition_is_valid_;
   rclcpp::executors::SingleThreadedExecutor::SharedPtr executor_;
+  rclcpp::CallbackGroup::SharedPtr executor_callback_group_ = nullptr;
   std::promise<void> executor_promise_;
   std::thread thread_;
 };

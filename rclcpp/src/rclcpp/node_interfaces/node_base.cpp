@@ -147,17 +147,10 @@ NodeBase::NodeBase(
 
 NodeBase::~NodeBase()
 {
-  std::cerr << "~NodeBase..." << std::endl;
   // Finalize the interrupt guard condition after removing self from graph listener.
   {
     std::lock_guard<std::recursive_mutex> notify_condition_lock(notify_guard_condition_mutex_);
     notify_guard_condition_is_valid_ = false;
-  }
-
-  if (thread_.joinable()) {
-    executor_promise_.set_value();
-    executor_->cancel();
-    thread_.join();
   }
 }
 
@@ -222,8 +215,22 @@ NodeBase::create_callback_group(
   return group;
 }
 
+RCLCPP_PUBLIC
+rclcpp::CallbackGroup::SharedPtr
+NodeBase::get_builtin_callback_group()
+{
+  if (!executor_callback_group_) {
+    executor_callback_group_ = create_callback_group(
+      rclcpp::CallbackGroupType::MutuallyExclusive,
+      false);
+    executor_->add_callback_group(executor_callback_group_, shared_from_this());
+  }
+  return executor_callback_group_;
+}
+
+RCLCPP_PUBLIC
 void
-NodeBase::add_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr)
+NodeBase::start_builtin_executor_thread()
 {
   if (!thread_.joinable()) {
     executor_promise_ = std::promise<void>{};
@@ -234,14 +241,16 @@ NodeBase::add_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr)
       }
     );
   }
-  executor_->add_callback_group(group_ptr, shared_from_this());
 }
 
+RCLCPP_PUBLIC
 void
-NodeBase::remove_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr)
+NodeBase::stop_builtin_executor_thread()
 {
   if (thread_.joinable()) {
-    executor_->remove_callback_group(group_ptr);
+    executor_promise_.set_value();
+    executor_->cancel();
+    thread_.join();
   }
 }
 

@@ -207,8 +207,8 @@ public:
   ~NodeState()
   {
     if (
-      node_base_ || node_topics_ || node_graph_ || node_services_
-      || node_logging_ || node_clock_ || node_parameters_)
+      node_base_ || node_topics_ || node_graph_ || node_services_ ||
+      node_logging_ || node_clock_ || node_parameters_)
     {
       detachNode();
     }
@@ -224,12 +224,6 @@ public:
   void set_use_clock_thread(bool use_clock_thread)
   {
     use_clock_thread_ = use_clock_thread;
-  }
-
-  // Check if the clock thread is joinable
-  bool clock_thread_is_joinable()
-  {
-    return clock_executor_thread_.joinable();
   }
 
   // Attach a node to this time source
@@ -297,7 +291,6 @@ public:
   // Detach the attached node
   void detachNode()
   {
-    std::cerr << "detachNode..." << std::endl;
     // destroy_clock_sub() *must* be first here, to ensure that the executor
     // can't possibly call any of the callbacks as we are cleaning up.
     destroy_clock_sub();
@@ -331,7 +324,6 @@ private:
 
   // Dedicated thread for clock subscription.
   bool use_clock_thread_;
-  std::thread clock_executor_thread_;
 
   // Preserve the node reference
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_{nullptr};
@@ -388,12 +380,8 @@ private:
       });
 
     if (use_clock_thread_) {
-      clock_callback_group_ = node_base_->create_callback_group(
-        rclcpp::CallbackGroupType::MutuallyExclusive,
-        false
-      );
+      clock_callback_group_ = node_base_->get_builtin_callback_group();
       options.callback_group = clock_callback_group_;
-      node_base_->add_callback_group(clock_callback_group_);
     }
 
     clock_subscription_ = rclcpp::create_subscription<rosgraph_msgs::msg::Clock>(
@@ -416,15 +404,7 @@ private:
   void destroy_clock_sub()
   {
     std::lock_guard<std::mutex> guard(clock_sub_lock_);
-    if (!clock_subscription_) {
-      return;
-    }
-
-    if (clock_callback_group_) {
-      node_base_->remove_callback_group(clock_callback_group_);
-    }
     clock_subscription_.reset();
-    clock_subscription_ = nullptr;
   }
 
   // On set Parameters callback handle
@@ -572,11 +552,6 @@ bool TimeSource::get_use_clock_thread()
 void TimeSource::set_use_clock_thread(bool use_clock_thread)
 {
   node_state_->set_use_clock_thread(use_clock_thread);
-}
-
-bool TimeSource::clock_thread_is_joinable()
-{
-  return node_state_->clock_thread_is_joinable();
 }
 
 TimeSource::~TimeSource()

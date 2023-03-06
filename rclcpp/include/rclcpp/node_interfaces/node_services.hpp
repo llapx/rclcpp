@@ -20,15 +20,10 @@
 #include "rclcpp/callback_group.hpp"
 #include "rclcpp/client.hpp"
 #include "rclcpp/macros.hpp"
-#include "rclcpp/node.hpp"
 #include "rclcpp/node_interfaces/node_base_interface.hpp"
 #include "rclcpp/node_interfaces/node_services_interface.hpp"
 #include "rclcpp/service.hpp"
-#include "rclcpp/qos.hpp"
 #include "rclcpp/visibility_control.hpp"
-#include "rcl_interfaces/srv/get_logger_levels.hpp"
-#include "rcl_interfaces/srv/set_logger_levels.hpp"
-#include "rmw/rmw.h"
 
 namespace rclcpp
 {
@@ -42,7 +37,7 @@ public:
   RCLCPP_SMART_PTR_ALIASES_ONLY(NodeServices)
 
   RCLCPP_PUBLIC
-  NodeServices(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base);
+  explicit NodeServices(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base);
 
   RCLCPP_PUBLIC
   virtual

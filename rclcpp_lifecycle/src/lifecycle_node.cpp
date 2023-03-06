@@ -83,7 +83,7 @@ LifecycleNode::LifecycleNode(
       node_base_,
       node_services_,
       options.enable_log_service()
-      )),
+    )),
   node_clock_(new rclcpp::node_interfaces::NodeClock(
       node_base_,
       node_topics_,

@@ -112,17 +112,20 @@ public:
     rclcpp::CallbackGroupType group_type,
     bool automatically_add_to_executor_with_node = true) = 0;
 
-  /// Add a callback group to the node.
   RCLCPP_PUBLIC
   virtual
-  void
-  add_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) = 0;
+  rclcpp::CallbackGroup::SharedPtr
+  get_builtin_callback_group() = 0;
 
-  /// Remove a callback group to the node.
   RCLCPP_PUBLIC
   virtual
   void
-  remove_callback_group(rclcpp::CallbackGroup::SharedPtr group_ptr) = 0;
+  start_builtin_executor_thread() = 0;
+
+  RCLCPP_PUBLIC
+  virtual
+  void
+  stop_builtin_executor_thread() = 0;
 
   /// Return the default callback group.
   RCLCPP_PUBLIC

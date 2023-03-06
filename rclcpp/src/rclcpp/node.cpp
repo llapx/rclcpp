@@ -171,9 +171,9 @@ Node::Node(
   node_topics_(new rclcpp::node_interfaces::NodeTopics(node_base_.get(), node_timers_.get())),
   node_services_(new rclcpp::node_interfaces::NodeServices(node_base_)),
   node_logging_(new rclcpp::node_interfaces::NodeLogging(
-    node_base_,
-    node_services_,
-    options.enable_log_service()
+      node_base_,
+      node_services_,
+      options.enable_log_service()
     )),
   node_clock_(new rclcpp::node_interfaces::NodeClock(
       node_base_,
@@ -229,6 +229,8 @@ Node::Node(
     node_topics_->resolve_topic_name("/parameter_events"),
     options.parameter_event_qos(),
     rclcpp::detail::PublisherQosParametersTraits{});
+
+  node_base_->start_builtin_executor_thread();
 }
 
 Node::Node(
@@ -267,10 +269,13 @@ Node::Node(
             rmw_namespace_validation_result_string(validation_result),
             invalid_index);
   }
+
+  node_base_->start_builtin_executor_thread();
 }
 
 Node::~Node()
 {
+  node_base_->stop_builtin_executor_thread();
   // release sub-interfaces in an order that allows them to consult with node_base during tear-down
   node_waitables_.reset();
   node_time_source_.reset();

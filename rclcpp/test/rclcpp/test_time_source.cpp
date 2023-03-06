@@ -46,13 +46,11 @@ protected:
 
   void SetUp()
   {
-    std::cerr << "SetUp..." << std::endl;
     node = std::make_shared<rclcpp::Node>("my_node");
   }
 
   void TearDown()
   {
-    std::cerr << "TearDown..." << std::endl;
     node.reset();
   }
 
@@ -115,8 +113,7 @@ void spin_until_ros_time_updated(
       break;  // Break for ctrl-c
     }
 
-    //executor.spin_once(10ms);
-    std::this_thread::sleep_for(10ms);
+    executor.spin_once(10ms);
 
     // In the case where we didn't intend to change the parameter, we'll still pump
     if (value.get_type() == rclcpp::ParameterType::PARAMETER_NOT_SET) {
@@ -124,7 +121,6 @@ void spin_until_ros_time_updated(
     }
 
     if (clock->ros_time_is_active() == value.get<bool>()) {
-      std::cerr << "ros_time_is_active!" << std::endl;
       return;
     }
   }
@@ -245,14 +241,12 @@ TEST_F(TestTimeSource, ROS_time_valid_sim_time) {
 
   set_use_sim_time_parameter(node, rclcpp::ParameterValue(true), ros_clock);
   ts.attachNode(node);
-  std::cerr << "attach Node..." << std::endl;
   EXPECT_TRUE(ros_clock->ros_time_is_active());
 
   ts.attachClock(ros_clock2);
-  std::cerr << "attach Clock..." << std::endl;
   EXPECT_TRUE(ros_clock2->ros_time_is_active());
 }
-#if 0
+
 TEST_F(TestTimeSource, ROS_invalid_sim_time) {
   rclcpp::TimeSource ts(node);
   EXPECT_FALSE(node->set_parameter(rclcpp::Parameter("use_sim_time", "not boolean")).successful);
@@ -583,11 +577,6 @@ public:
   {
     return this->get_use_clock_thread();
   }
-
-  bool IsClockThreadJoinable()
-  {
-    return this->clock_thread_is_joinable();
-  }
 };
 
 TEST_F(TestTimeSource, check_use_clock_thread_value) {
@@ -620,42 +609,6 @@ TEST_F(TestTimeSource, check_use_clock_thread_value) {
 
   ts.attachNode(no_clock_thread_node_);
   ASSERT_FALSE(ts.GetUseClockThreadOption());
-  ts.detachNode();
-}
-
-TEST_F(TestTimeSource, check_clock_thread_status) {
-  // Test if TimeSource clock-dedicated thread is running
-  // according to the use_sim_time parameter
-  // and to the options of the attached node
-  ClockThreadTestingTimeSource ts;
-
-  // Tests for default options node
-  auto default_node_ = std::make_shared<rclcpp::Node>(
-    "default_option_node");
-
-  default_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
-  ts.attachNode(default_node_);
-  ASSERT_TRUE(ts.IsClockThreadJoinable());
-  ts.detachNode();
-
-  default_node_->set_parameter(rclcpp::Parameter("use_sim_time", false));
-  ts.attachNode(default_node_);
-  ASSERT_FALSE(ts.IsClockThreadJoinable());
-  ts.detachNode();
-
-  // Tests for node with use_clock_thread option forced to false
-  auto no_clock_thread_node_ = std::make_shared<rclcpp::Node>(
-    "no_clock_thread_node",
-    rclcpp::NodeOptions().use_clock_thread(false));
-
-  no_clock_thread_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
-  ts.attachNode(no_clock_thread_node_);
-  ASSERT_FALSE(ts.IsClockThreadJoinable());
-  ts.detachNode();
-
-  no_clock_thread_node_->set_parameter(rclcpp::Parameter("use_sim_time", false));
-  ts.attachNode(no_clock_thread_node_);
-  ASSERT_FALSE(ts.IsClockThreadJoinable());
   ts.detachNode();
 }
 
@@ -828,4 +781,3 @@ TEST_F(TestTimeSource, clock_sleep_until_with_ros_time_basic) {
   auto until = now + rclcpp::Duration(0, 500);
   EXPECT_TRUE(clock->sleep_until(until));
 }
-#endif
