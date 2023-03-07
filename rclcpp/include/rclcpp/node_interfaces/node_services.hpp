@@ -37,7 +37,7 @@ public:
   RCLCPP_SMART_PTR_ALIASES_ONLY(NodeServices)
 
   RCLCPP_PUBLIC
-  explicit NodeServices(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base);
+  explicit NodeServices(rclcpp::node_interfaces::NodeBaseInterface * node_base);
 
   RCLCPP_PUBLIC
   virtual
@@ -62,7 +62,7 @@ public:
 private:
   RCLCPP_DISABLE_COPY(NodeServices)
 
-  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_;
+  rclcpp::node_interfaces::NodeBaseInterface * node_base_;
 };
 
 }  // namespace node_interfaces

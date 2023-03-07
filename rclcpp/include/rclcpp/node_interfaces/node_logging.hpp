@@ -59,7 +59,7 @@ public:
 private:
   RCLCPP_DISABLE_COPY(NodeLogging)
 
-  RCLCPP_PUBLIC
+  RCLCPP_LOCAL
   void
   add_log_services();
 
@@ -71,7 +71,6 @@ private:
 
   rclcpp::Service<rcl_interfaces::srv::GetLoggerLevels>::SharedPtr get_loggers_service_;
   rclcpp::Service<rcl_interfaces::srv::SetLoggerLevels>::SharedPtr set_loggers_service_;
-  rclcpp::CallbackGroup::SharedPtr callback_group_{nullptr};
 };
 
 }  // namespace node_interfaces

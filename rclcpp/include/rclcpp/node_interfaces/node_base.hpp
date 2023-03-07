@@ -168,6 +168,7 @@ private:
   mutable std::recursive_mutex notify_guard_condition_mutex_;
   rclcpp::GuardCondition notify_guard_condition_;
   bool notify_guard_condition_is_valid_;
+
   rclcpp::executors::SingleThreadedExecutor::SharedPtr executor_;
   rclcpp::CallbackGroup::SharedPtr executor_callback_group_ = nullptr;
   std::promise<void> executor_promise_;

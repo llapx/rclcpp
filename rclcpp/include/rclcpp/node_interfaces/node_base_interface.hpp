@@ -112,6 +112,7 @@ public:
     rclcpp::CallbackGroupType group_type,
     bool automatically_add_to_executor_with_node = true) = 0;
 
+  /// Return a callback group which is executed in internal executor.
   RCLCPP_PUBLIC
   virtual
   rclcpp::CallbackGroup::SharedPtr

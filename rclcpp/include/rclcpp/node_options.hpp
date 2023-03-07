@@ -239,8 +239,8 @@ public:
 
   /// Set the enable_log_service flag, return this for logger idiom.
   /**
-   * If true, ROS services are created to allow external nodes to list, get,
-   * and request to set logger levels of this node.
+   * If true, ROS services are created to allow external nodes to get
+   * and set logger levels of this node.
    *
    * If false, loggers will still work locally, but will not be accessible
    * remotely.

@@ -50,7 +50,7 @@ NodeLogging::add_log_services(void)
 {
   const rclcpp::QoS & qos_profile = rclcpp::ServicesQoS();
   const std::string node_name = node_base_->get_name();
-  callback_group_ = node_base_->get_builtin_callback_group();
+  auto callback_group = node_base_->get_builtin_callback_group();
 
   get_loggers_service_ = rclcpp::create_service<rcl_interfaces::srv::GetLoggerLevels>(
     node_base_, node_services_,
@@ -73,7 +73,7 @@ NodeLogging::add_log_services(void)
         response->levels.push_back(std::move(level));
       }
     },
-    qos_profile, callback_group_);
+    qos_profile, callback_group);
 
   set_loggers_service_ = rclcpp::create_service<rcl_interfaces::srv::SetLoggerLevels>(
     node_base_, node_services_,
@@ -96,5 +96,5 @@ NodeLogging::add_log_services(void)
         response->results.push_back(std::move(result));
       }
     },
-    qos_profile, callback_group_);
+    qos_profile, callback_group);
 }
