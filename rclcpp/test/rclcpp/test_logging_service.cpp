@@ -48,29 +48,11 @@ protected:
   rclcpp::Node::SharedPtr node;
 };
 
-TEST_F(TestLoggingService, get_logger_levels) {
-  auto client = node->create_client<rcl_interfaces::srv::GetLoggerLevels>(
-    "/ns/test_logging_service/get_logger_levels");
-  ASSERT_TRUE(client->wait_for_service(1s));
-  auto request = std::make_shared<rcl_interfaces::srv::GetLoggerLevels::Request>();
-  request->names = {"/ns/test_logging_service"};
-  auto result = client->async_send_request(request);
-  ASSERT_EQ(
-    rclcpp::spin_until_future_complete(node, result),
-    rclcpp::FutureReturnCode::SUCCESS);
-  auto result_get = result.get();
-  ASSERT_EQ(result_get->levels.size(), 1u);
-  ASSERT_STREQ(result_get->levels[0].name.c_str(), "/ns/test_logging_service");
-  ASSERT_EQ(result_get->levels[0].level, 0u);
-}
-
-TEST_F(TestLoggingService, set_logger_levels) {
-  auto client = node->create_client<rcl_interfaces::srv::SetLoggerLevels>(
-    "/ns/test_logging_service/set_logger_levels");
-  ASSERT_TRUE(client->wait_for_service(1s));
-
+TEST_F(TestLoggingService, test_logging_service) {
   {
-    // set log level with right value
+    auto client = node->create_client<rcl_interfaces::srv::SetLoggerLevels>(
+      "/ns/test_logging_service/set_logger_levels");
+    ASSERT_TRUE(client->wait_for_service(1s));
     auto request = std::make_shared<rcl_interfaces::srv::SetLoggerLevels::Request>();
     auto level = rcl_interfaces::msg::LoggerLevel();
     level.name = "/ns/test_logging_service";
@@ -86,18 +68,18 @@ TEST_F(TestLoggingService, set_logger_levels) {
   }
 
   {
-    // set log level with wrong value
-    auto request = std::make_shared<rcl_interfaces::srv::SetLoggerLevels::Request>();
-    auto level = rcl_interfaces::msg::LoggerLevel();
-    level.name = "/ns/test_logging_service";
-    level.level = 11u;
-    request->levels.push_back(level);
+    auto client = node->create_client<rcl_interfaces::srv::GetLoggerLevels>(
+      "/ns/test_logging_service/get_logger_levels");
+    ASSERT_TRUE(client->wait_for_service(1s));
+    auto request = std::make_shared<rcl_interfaces::srv::GetLoggerLevels::Request>();
+    request->names = {"/ns/test_logging_service"};
     auto result = client->async_send_request(request);
     ASSERT_EQ(
       rclcpp::spin_until_future_complete(node, result),
       rclcpp::FutureReturnCode::SUCCESS);
     auto result_get = result.get();
-    ASSERT_EQ(result_get->results.size(), 1u);
-    ASSERT_FALSE(result_get->results[0].successful);
+    ASSERT_EQ(result_get->levels.size(), 1u);
+    ASSERT_STREQ(result_get->levels[0].name.c_str(), "/ns/test_logging_service");
+    ASSERT_EQ(result_get->levels[0].level, 10u);
   }
 }
